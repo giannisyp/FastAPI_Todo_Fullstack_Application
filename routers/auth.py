@@ -14,9 +14,9 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi.responses import HTMLResponse 
 from fastapi.templating import Jinja2Templates
+from config import settings
 
-SECRET_KEY = "KlgH6AzYDeZeGwD288to79I3vTHT8wp7"
-ALGORITHM = "HS256"
+
 
 templates = Jinja2Templates(directory="templates")
 
@@ -81,7 +81,7 @@ def create_access_token(username: str, user_id: int,
     else:
         expire = datetime.now() + timedelta(minutes=15)
     encode.update({"exp": expire})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(encode, settings.secret_key, algorithm=settings.algorithm)
 
 
 async def get_current_user(request: Request):
@@ -89,7 +89,7 @@ async def get_current_user(request: Request):
         token = request.cookies.get("access_token")
         if token == None:
             return None
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
         if username is None or user_id is None:
